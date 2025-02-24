@@ -464,6 +464,31 @@ export default function AdminPage() {
     checkSession()
   }, [])
 
+  // 세션 타이머 업데이트
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+
+    if (isLoggedIn && sessionTimer > 0) {
+      timer = setInterval(() => {
+        setSessionTimer(prev => {
+          if (prev <= 1) {
+            // 세션 만료
+            clearInterval(timer);
+            handleLogout();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [isLoggedIn, sessionTimer]);
+
   // 로딩 중일 때는 로딩 표시
   if (isLoading) {
     return (
