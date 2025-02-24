@@ -1,7 +1,7 @@
 export const formSections = [
   {
     id: 'introImage',
-    title: '1도GYM 소개',
+    title: '[ 1도GYM 소개 ]',
     type: 'image',
     imageUrl: '/img/form1.jpg'
   },
