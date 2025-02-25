@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <meta name="google-site-verification" content="xEuZhAbn3bdB6UvHHM8VCNTNyKFYJ4791H-L7NJvnfc" />
+        <meta name="google-site-verification" content="UEFedNALtESw4sbZOz8g0EZA-7rPXxcNOpeKGCwV9Fg" />
         <meta name="naver-site-verification" content="ee33201c27d47e576e6f1a8e7a546c72d1432898" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta name="robots" content="index, follow" />
