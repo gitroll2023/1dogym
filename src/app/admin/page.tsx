@@ -31,6 +31,128 @@ interface Applicant {
   createdAt: string
 }
 
+interface EditModalProps {
+  applicant: Applicant | null
+  onClose: () => void
+  onSave: (updatedApplicant: Applicant) => void
+}
+
+function EditModal({ applicant, onClose, onSave }: EditModalProps) {
+  const [editForm, setEditForm] = useState<Applicant | null>(applicant)
+
+  useEffect(() => {
+    setEditForm(applicant)
+  }, [applicant])
+
+  if (!editForm) return null
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (editForm) {
+      onSave(editForm)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">신청 정보 수정</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">이름</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">전화번호</label>
+              <input
+                type="text"
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">운동 빈도</label>
+              <input
+                type="text"
+                value={editForm.exerciseFrequency}
+                onChange={(e) => setEditForm({ ...editForm, exerciseFrequency: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">운동 목적</label>
+              <input
+                type="text"
+                value={editForm.exercisePurpose}
+                onChange={(e) => setEditForm({ ...editForm, exercisePurpose: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">자세 상태</label>
+              <input
+                type="text"
+                value={editForm.postureType}
+                onChange={(e) => setEditForm({ ...editForm, postureType: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">미주신경 운동 PT 관련 응답</label>
+              <textarea
+                value={editForm.nerveResponse}
+                onChange={(e) => setEditForm({ ...editForm, nerveResponse: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+                rows={4}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">참여 의향</label>
+              <select
+                value={editForm.participationIntent}
+                onChange={(e) => setEditForm({ ...editForm, participationIntent: e.target.value })}
+                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2"
+              >
+                <option value="yes">O</option>
+                <option value="no">X</option>
+              </select>
+            </div>
+          </div>
+          <div className="mt-6 flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600"
+            >
+              저장
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function LoginForm({ onLogin }: { onLogin: (success: boolean) => void }) {
   const [loginForm, setLoginForm] = useState({ id: '', password: '' })
   const [isLoading, setIsLoading] = useState(false)
@@ -438,6 +560,35 @@ export default function AdminPage() {
     return true;
   });
 
+  const handleEdit = (applicant: Applicant) => {
+    setSelectedApplicant(applicant)
+  }
+
+  const handleSave = async (updatedApplicant: Applicant) => {
+    try {
+      const response = await fetch(`/api/applicants/${updatedApplicant.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedApplicant),
+      })
+
+      if (response.ok) {
+        // 수정된 데이터로 목록 업데이트
+        setApplicants(applicants.map(a => 
+          a.id === updatedApplicant.id ? updatedApplicant : a
+        ))
+        setSelectedApplicant(null)
+      } else {
+        alert('수정 중 오류가 발생했습니다.')
+      }
+    } catch (error) {
+      console.error('Error updating applicant:', error)
+      alert('수정 중 오류가 발생했습니다.')
+    }
+  }
+
   useEffect(() => {
     // 페이지 로드 시 세션 확인
     const checkSession = () => {
@@ -772,6 +923,13 @@ export default function AdminPage() {
                   상세보기
                 </button>
                 <button
+                  onClick={() => handleEdit(applicant)}
+                  className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 
+                    rounded-md transition-colors duration-200 flex items-center justify-center"
+                >
+                  수정
+                </button>
+                <button
                   onClick={() => handleToggleCheck(applicant.id)}
                   className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200
                     flex items-center justify-center
@@ -998,6 +1156,13 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+        )}
+        {selectedApplicant && (
+          <EditModal
+            applicant={selectedApplicant}
+            onClose={() => setSelectedApplicant(null)}
+            onSave={handleSave}
+          />
         )}
       </main>
     </div>
