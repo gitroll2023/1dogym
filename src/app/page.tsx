@@ -1,19 +1,16 @@
+'use client'
+
+import { useState } from 'react'
 import Header from '@/components/Header'
 import MainSlideshow from '@/components/MainSlideshow'
 import ServiceSection from '@/components/ServiceSection'
 import GallerySection from '@/components/GallerySection'
+import QRCodeModal from '@/components/QRCodeModal'
 
-import type { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: '1도GYM - 전문적인 미주신경 운동 PT | 자세교정 | 건강증진',
-  description: '1도GYM은 전문적인 미주신경 운동 PT 서비스를 제공합니다. 개인 맞춤형 자세교정, 체형관리, 건강증진 프로그램으로 당신의 건강한 삶을 지원합니다.',
-  alternates: {
-    canonical: 'https://1dogym.com'
-  }
-}
 
 export default function Home() {
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false)
   return (
     <>
       <Header />
@@ -21,6 +18,20 @@ export default function Home() {
         {/* 메인 슬라이드쇼 섹션 */}
         <MainSlideshow />
         
+        {/* QR 코드 섹션 */}
+        <div className="flex justify-center py-8 bg-gray-50">
+          <button
+            onClick={() => setIsQRModalOpen(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 
+              transition-colors duration-200 flex items-center space-x-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+            <span>사이트 방문 QR 코드 보기</span>
+          </button>
+        </div>
+
         {/* 서비스 소개 섹션 */}
         <ServiceSection />
         
@@ -45,6 +56,15 @@ export default function Home() {
             </svg>
           </a>
         </div>
+
+
+
+        {/* QR 코드 모달 */}
+        <QRCodeModal
+          isOpen={isQRModalOpen}
+          onClose={() => setIsQRModalOpen(false)}
+          url="https://1dogym.kro.kr"
+        />
       </main>
     </>
   )

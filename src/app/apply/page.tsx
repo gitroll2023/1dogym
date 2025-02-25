@@ -4,8 +4,10 @@ import { useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formSections, personalInfoSection } from '@/config/formConfig'
+import QRCodeModal from '@/components/QRCodeModal'
 
 export default function ApplyPage() {
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false)
   const [formData, setFormData] = useState({
     exerciseFrequency: '',
     exercisePurpose: '',
@@ -235,7 +237,7 @@ export default function ApplyPage() {
   )
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* 상단 헤더 */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -250,6 +252,20 @@ export default function ApplyPage() {
             <span className="hidden sm:inline">메인으로</span>
           </Link>
         </div>
+      </div>
+
+      {/* QR 코드 버튼 */}
+      <div className="flex justify-center py-4 bg-white border-b border-gray-200">
+        <button
+          onClick={() => setIsQRModalOpen(true)}
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 
+            transition-colors duration-200 flex items-center space-x-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+          </svg>
+          <span>신청페이지 QR 코드 보기</span>
+        </button>
       </div>
 
       {/* 폼 컨테이너 */}
@@ -320,6 +336,13 @@ export default function ApplyPage() {
           </div>
         </div>
       )}
-    </main>
+
+      {/* QR 코드 모달 */}
+      <QRCodeModal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        url="https://1dogym.kro.kr/apply"
+      />
+    </div>
   )
 }
