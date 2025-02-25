@@ -142,6 +142,28 @@ export default function ApplyPage() {
                   priority
                 />
               </div>
+              <div className="mt-6 space-y-4 text-gray-700">
+                <p className="leading-relaxed">
+                  위 이미지처럼 <span className="font-semibold text-blue-600">이상적인 자세</span>를 유지하는 것이 건강한 몸을 위해 매우 중요합니다. 
+                  하지만 대부분의 현대인들은 잘못된 자세로 인해 다양한 건강 문제를 겪고 있죠.
+                </p>
+                <p className="leading-relaxed">
+                  <span className="font-semibold">"어깨 펴세요!", "허리 똑바로!", "가슴을 펴세요!"</span><br />
+                  이런 말들을 자주 들어보셨나요? 순간적으로 자세를 교정하려 해도, 
+                  의식적인 노력만으로는 지속적인 자세 교정이 어렵습니다.
+                </p>
+                <p className="leading-relaxed">
+                  <span className="font-semibold text-blue-600">1도GYM</span>은 단순한 운동이 아닌, 
+                  <span className="font-semibold">뇌 활성화 프로그램</span>을 통해 자연스러운 자세 교정을 돕습니다. 
+                  전문 트레이너와 함께하는 맞춤형 PT 프로그램으로, 당신의 뇌가 스스로 올바른 자세를 인지하고 
+                  유지할 수 있도록 도와드립니다.
+                </p>
+                <div className="bg-blue-50 p-4 rounded-lg mt-6">
+                  <p className="font-semibold text-blue-800">
+                    💡 지금 바로 신청하고 전문가와 함께 당신의 건강한 변화를 시작하세요!
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
