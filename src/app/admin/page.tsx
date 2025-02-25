@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import html2canvas from 'html2canvas'
 import Link from 'next/link'
+import NoticeModal from '@/components/NoticeModal'
+import type { Notice } from '@/types/notice'
 
 // CSV 다운로드 유틸리티 함수 추가
 const downloadAsCSV = (data: string, filename: string) => {
@@ -111,6 +113,7 @@ function LoginForm({ onLogin }: { onLogin: (success: boolean) => void }) {
 
               <button
                 type="submit"
+                disabled={isLoading}
                 className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
               >
                 로그인
@@ -147,6 +150,9 @@ export default function AdminPage() {
   const [searchText, setSearchText] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false)
+  const [currentNotice, setCurrentNotice] = useState<Notice | null>(null)
+  const [noticeModalMode, setNoticeModalMode] = useState<'create' | 'edit'>('create')
 
   const modalContentRef = useRef<HTMLDivElement>(null)
 
@@ -489,6 +495,91 @@ export default function AdminPage() {
     };
   }, [isLoggedIn, sessionTimer]);
 
+  // 공지사항 관련 함수들
+  const fetchCurrentNotice = async () => {
+    try {
+      const response = await fetch('/api/notice')
+      const data = await response.json()
+      if (data.success && data.notice) {
+        setCurrentNotice(data.notice)
+      }
+    } catch (error) {
+      console.error('Error fetching notice:', error)
+    }
+  }
+
+  const handleCreateNotice = async (notice: Omit<Notice, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      const response = await fetch('/api/notice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(notice),
+      })
+      const data = await response.json()
+      if (data.success) {
+        alert('공지가 등록되었습니다.')
+        setIsNoticeModalOpen(false)
+        fetchCurrentNotice()
+      } else {
+        alert('공지 등록에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Error creating notice:', error)
+      alert('공지 등록 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleUpdateNotice = async (notice: Omit<Notice, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!currentNotice) return
+    try {
+      const response = await fetch('/api/notice', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...notice, id: currentNotice.id }),
+      })
+      const data = await response.json()
+      if (data.success) {
+        alert('공지가 수정되었습니다.')
+        setIsNoticeModalOpen(false)
+        fetchCurrentNotice()
+      } else {
+        alert('공지 수정에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Error updating notice:', error)
+      alert('공지 수정 중 오류가 발생했습니다.')
+    }
+  }
+
+  const handleDeleteNotice = async () => {
+    if (!currentNotice) return
+    if (!confirm('정말로 이 공지를 삭제하시겠습니까?')) return
+
+    try {
+      const response = await fetch(`/api/notice?id=${currentNotice.id}`, {
+        method: 'DELETE',
+      })
+      const data = await response.json()
+      if (data.success) {
+        alert('공지가 삭제되었습니다.')
+        setCurrentNotice(null)
+      } else {
+        alert('공지 삭제에 실패했습니다.')
+      }
+    } catch (error) {
+      console.error('Error deleting notice:', error)
+      alert('공지 삭제 중 오류가 발생했습니다.')
+    }
+  }
+
+  useEffect(() => {
+    fetchCurrentNotice()
+  }, [])
+
   // 로딩 중일 때는 로딩 표시
   if (isLoading) {
     return (
@@ -504,8 +595,8 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* 상단 헤더 */}
+    <div className="min-h-screen bg-gray-50 p-4">
+      {/* 헤더 */}
       <header className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto px-4">
           <div className="flex flex-col gap-3 py-4">
@@ -526,7 +617,7 @@ export default function AdminPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                메인페이지
+                <span className="ml-2">메인페이지</span>
               </Link>
               <Link
                 href="/admin/meta"
@@ -535,16 +626,31 @@ export default function AdminPage() {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                메타데이터
+                <span className="ml-2">메타데이터</span>
+              </Link>
+              <Link
+                href="/admin/notice"
+                className="flex items-center p-2 bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow duration-200 group"
+              >
+                <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-2 rounded-xl shadow-inner group-hover:from-blue-600 group-hover:to-blue-700 transition-all duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="ml-2">
+                  <h3 className="text-lg font-semibold text-gray-900">일정공지 관리</h3>
+                  <p className="text-sm text-gray-500">장소와 시간 공지사항을 관리합니다</p>
+                </div>
               </Link>
               <button
                 onClick={handleLogout}
-                className="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-auto"
+                className="inline-flex items-center gap-2 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors ml-auto"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                로그아웃
+                <span className="ml-2">로그아웃</span>
               </button>
             </div>
           </div>
@@ -797,6 +903,7 @@ export default function AdminPage() {
           ))}
         </div>
 
+
         {/* 상세보기 모달 */}
         {showModal && selectedApplicant && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -848,7 +955,7 @@ export default function AdminPage() {
                 <div className="space-y-6">
                   {/* 기본 정보 섹션 */}
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-lg font-semibold text-blue-600 mb-4">기본 정보</h4>
+                    <h4 className="text-lg font-medium text-blue-600 mb-4">기본 정보</h4>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <p className="text-sm text-gray-500">이름</p>
@@ -881,7 +988,7 @@ export default function AdminPage() {
 
                   {/* 운동 관련 정보 섹션 */}
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-lg font-semibold text-blue-600 mb-4">운동 관련 정보</h4>
+                    <h4 className="text-lg font-medium text-blue-600 mb-4">운동 관련 정보</h4>
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-gray-500">운동 빈도</p>
@@ -906,7 +1013,7 @@ export default function AdminPage() {
 
                   {/* 미주신경 운동 응답 섹션 */}
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <h4 className="text-lg font-semibold text-blue-600 mb-4">미주신경 운동 관련 응답</h4>
+                    <h4 className="text-lg font-medium text-blue-600 mb-4">미주신경 운동 관련 응답</h4>
                     <p className="whitespace-pre-wrap">{selectedApplicant.nerveResponse}</p>
                   </div>
                 </div>
@@ -999,6 +1106,20 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+        {/* 공지사항 모달 */}
+        <NoticeModal
+          isOpen={isNoticeModalOpen}
+          onClose={() => setIsNoticeModalOpen(false)}
+          onSubmit={noticeModalMode === 'create' ? handleCreateNotice : handleUpdateNotice}
+          initialNotice={noticeModalMode === 'edit' && currentNotice ? {
+            content: currentNotice.content,
+            location: currentNotice.location,
+            startTime: currentNotice.startTime,
+            endTime: currentNotice.endTime
+          } : undefined}
+          mode={noticeModalMode}
+        />
       </main>
     </div>
   )

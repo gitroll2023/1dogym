@@ -23,3 +23,13 @@ model Applicant {
   checked             Boolean  @default(false)
   createdAt           DateTime @default(now())
 }
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  content   String   // 공지 내용
+  location  String   // 장소
+  startTime String   // 시작 시간
+  endTime   String   // 종료 시간
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
