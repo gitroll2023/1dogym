@@ -24,7 +24,7 @@ export default function QRCodeModal({ isOpen, onClose, url }: QRCodeModalProps) 
         <div className="flex flex-col items-center space-y-4">
           <QRCodeSVG
             value={url}
-            size={200}
+            size={300}
             level="H"
             includeMargin={true}
             className="shadow-lg rounded-lg"
